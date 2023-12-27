@@ -1,1 +1,1 @@
-return 24;
+exit 32;
