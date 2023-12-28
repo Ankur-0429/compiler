@@ -25,6 +25,6 @@ private:
     const std::string m_src;
     size_t m_current_index{};
 
-    [[nodiscard]] std::optional<char> peak() const;
+    [[nodiscard]] std::optional<char> peek() const;
     char consume();
 };

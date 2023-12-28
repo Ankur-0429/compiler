@@ -6,10 +6,10 @@ Tokenizer::Tokenizer(std::string &src) : m_src(src) {}
 std::vector<Token> Tokenizer::tokenize() {
     std::string buf;
     std::vector<Token> tokens;
-    while (peak().has_value()) {
-        if (isalpha(peak().value())) {
+    while (peek().has_value()) {
+        if (isalpha(peek().value())) {
             buf.push_back(consume());
-            while (peak().has_value() && isalnum(peak().value())) {
+            while (peek().has_value() && isalnum(peek().value())) {
                 buf.push_back(consume());
             }
             if (buf == "exit") {
@@ -20,19 +20,19 @@ std::vector<Token> Tokenizer::tokenize() {
                 std::cerr << "exit keyword not found" << std::endl;
                 exit(EXIT_FAILURE);
             }
-        } else if (std::isdigit(peak().value())) {
+        } else if (std::isdigit(peek().value())) {
             buf.push_back(consume());
-            while (peak().has_value() && std::isdigit(peak().value())) {
+            while (peek().has_value() && std::isdigit(peek().value())) {
                 buf.push_back(consume());
             }
             tokens.push_back({.type = TokenType::integer_literal, .value = buf});
             buf.clear();
             continue;
-        } else if (peak().value() == ';') {
+        } else if (peek().value() == ';') {
             consume();
             tokens.push_back({.type = TokenType::semi_colon});
             continue;
-        } else if (std::isspace(peak().value())) {
+        } else if (std::isspace(peek().value())) {
             consume();
             continue;
         } else {
@@ -45,7 +45,7 @@ std::vector<Token> Tokenizer::tokenize() {
     return tokens;
 }
 
-std::optional<char> Tokenizer::peak() const {
+std::optional<char> Tokenizer::peek() const {
     if (m_current_index + 1 > m_src.length()) {
         return {};
     }
