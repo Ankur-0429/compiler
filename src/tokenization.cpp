@@ -1,4 +1,4 @@
-#include "tokenization.hpp"
+#include "tokenization.h"
 #include <iostream>
 
 Tokenizer::Tokenizer(std::string &src) : m_src(src) {}
@@ -45,7 +45,7 @@ std::vector<Token> Tokenizer::tokenize() {
     return tokens;
 }
 
-std::optional<char> Tokenizer::peak(int characters_ahead) const {
+std::optional<char> Tokenizer::peak() const {
     if (m_current_index + 1 > m_src.length()) {
         return {};
     }

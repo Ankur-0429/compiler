@@ -2,25 +2,9 @@
 #include <fstream>
 #include <sstream>
 #include <optional>
-#include "./tokenization.hpp"
-
-std::string tokens_to_asm(const std::vector<Token>& tokens) {
-    std::stringstream output_stream;
-    output_stream << ".global _main\n.align 2\n_main:\n";
-    for (int i = 0; i < tokens.size(); i++) {
-        const Token& token = tokens.at(i);
-        if (token.type == TokenType::exit) {
-            if (i + 1 < tokens.size() && tokens.at(i+1).type == TokenType::integer_literal) {
-                if (i + 2 < tokens.size() && tokens.at(i+2).type == TokenType::semi_colon) {
-                    output_stream << "    mov x0, #" << tokens.at(i+1).value.value() << "\n";
-                    output_stream << "    mov x16, #1\n";
-                    output_stream << "    svc 0";
-                }
-            }
-        }
-    }
-    return output_stream.str();
-}
+#include "parser.h"
+#include "tokenization.h"
+#include "generation.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -40,13 +24,22 @@ int main(int argc, char* argv[]) {
     Tokenizer tokenizer(contents);
 
     std::vector<Token> tokens = tokenizer.tokenize();
-    {
-        std::fstream file("out.s", std::ios::out);
-        file << tokens_to_asm(tokens);
+    Parser parser(tokens);
+    std::optional<NodeExit> tree = parser.parse();
+
+    if (!tree.has_value()) {
+        std::cerr << "Unable to parse correctly" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
-//    system("as out.s -o out.o");
-//    system("ld out.o -o out");
+    Generator generator(tree.value());
+    {
+        std::fstream file("out.s", std::ios::out);
+        file << generator.generate();
+    }
+
+    system("as out.s -o out.o");
+    system("ld out.o -o out");
 
     return EXIT_SUCCESS;
 }

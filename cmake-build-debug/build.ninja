@@ -61,6 +61,18 @@ build CMakeFiles/compiler.dir/src/tokenization.cpp.o: CXX_COMPILER__compiler_Deb
   OBJECT_DIR = CMakeFiles/compiler.dir
   OBJECT_FILE_DIR = CMakeFiles/compiler.dir/src
 
+build CMakeFiles/compiler.dir/src/parser.cpp.o: CXX_COMPILER__compiler_Debug /Users/ankurahir/CLionProjects/compiler/src/parser.cpp || cmake_object_order_depends_target_compiler
+  DEP_FILE = CMakeFiles/compiler.dir/src/parser.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -mmacosx-version-min=14.0 -fcolor-diagnostics -std=gnu++17
+  OBJECT_DIR = CMakeFiles/compiler.dir
+  OBJECT_FILE_DIR = CMakeFiles/compiler.dir/src
+
+build CMakeFiles/compiler.dir/src/generation.cpp.o: CXX_COMPILER__compiler_Debug /Users/ankurahir/CLionProjects/compiler/src/generation.cpp || cmake_object_order_depends_target_compiler
+  DEP_FILE = CMakeFiles/compiler.dir/src/generation.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -mmacosx-version-min=14.0 -fcolor-diagnostics -std=gnu++17
+  OBJECT_DIR = CMakeFiles/compiler.dir
+  OBJECT_FILE_DIR = CMakeFiles/compiler.dir/src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target compiler
@@ -69,7 +81,7 @@ build CMakeFiles/compiler.dir/src/tokenization.cpp.o: CXX_COMPILER__compiler_Deb
 #############################################
 # Link the executable compiler
 
-build compiler: CXX_EXECUTABLE_LINKER__compiler_Debug CMakeFiles/compiler.dir/src/main.cpp.o CMakeFiles/compiler.dir/src/tokenization.cpp.o
+build compiler: CXX_EXECUTABLE_LINKER__compiler_Debug CMakeFiles/compiler.dir/src/main.cpp.o CMakeFiles/compiler.dir/src/tokenization.cpp.o CMakeFiles/compiler.dir/src/parser.cpp.o CMakeFiles/compiler.dir/src/generation.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -mmacosx-version-min=14.0
   OBJECT_DIR = CMakeFiles/compiler.dir
   POST_BUILD = :

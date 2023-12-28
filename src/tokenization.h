@@ -23,8 +23,8 @@ public:
 
 private:
     const std::string m_src;
-    int m_current_index{};
+    size_t m_current_index{};
 
-    [[nodiscard]] std::optional<char> peak(int characters_ahead = 1) const;
+    [[nodiscard]] std::optional<char> peak() const;
     char consume();
 };
