@@ -8,3 +8,6 @@
 5	635	1703806848911591214	CMakeFiles/compiler.dir/src/main.cpp.o	3c57cd84b84b544d
 15	487	1703806884990597640	CMakeFiles/compiler.dir/src/tokenization.cpp.o	599a7f19b6c3feb5
 487	698	1703806885204792916	compiler	a0a8dbd5f3f85aa4
+5	371	1703806969731516883	CMakeFiles/compiler.dir/src/generation.cpp.o	d94cb79bc35ce5ad
+5	445	1703806969804701194	CMakeFiles/compiler.dir/src/main.cpp.o	3c57cd84b84b544d
+445	615	1703806969976321330	compiler	a0a8dbd5f3f85aa4

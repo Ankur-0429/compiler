@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     Generator generator(tree.value());
     {
         std::fstream file("out.s", std::ios::out);
-        file << generator.generate();
+        file << generator.generate_exit();
     }
 
     system("as out.s -o out.o");

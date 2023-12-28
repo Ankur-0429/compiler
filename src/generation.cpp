@@ -5,7 +5,7 @@
 #include <sstream>
 #include "generation.h"
 
-std::string Generator::generate() const {
+std::string Generator::generate_exit() const {
     std::stringstream output_stream;
     output_stream << ".global _main\n.align 2\n_main:\n";
     output_stream << "    mov x0, #" << m_root.expr.integer_literal.value.value() << "\n";
