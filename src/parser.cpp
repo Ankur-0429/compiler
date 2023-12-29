@@ -1,11 +1,11 @@
 #include "parser.h"
 #include <iostream>
 
-std::optional<Token> Parser::peek() const {
-    if (m_current_index + 1 > m_tokens.size()) {
+std::optional<Token> Parser::peek(int offset) const {
+    if (m_current_index + offset >= m_tokens.size()) {
         return {};
     }
-    return m_tokens.at(m_current_index);
+    return m_tokens.at(m_current_index + offset);
 }
 
 Token Parser::consume() {

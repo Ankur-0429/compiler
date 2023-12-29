@@ -25,6 +25,6 @@ private:
     const std::string m_src;
     size_t m_current_index{};
 
-    [[nodiscard]] std::optional<char> peek() const;
+    [[nodiscard]] std::optional<char> peek(int offset = 0) const;
     char consume();
 };

@@ -45,11 +45,11 @@ std::vector<Token> Tokenizer::tokenize() {
     return tokens;
 }
 
-std::optional<char> Tokenizer::peek() const {
-    if (m_current_index + 1 > m_src.length()) {
+std::optional<char> Tokenizer::peek(int offset) const {
+    if (m_current_index + offset >= m_src.length()) {
         return {};
     }
-    return m_src.at(m_current_index);
+    return m_src.at(m_current_index + offset);
 }
 
 char Tokenizer::consume() {

@@ -5,3 +5,17 @@
 15	487	1703806884990597640	CMakeFiles/compiler.dir/src/tokenization.cpp.o	599a7f19b6c3feb5
 5	445	1703806969804701194	CMakeFiles/compiler.dir/src/main.cpp.o	3c57cd84b84b544d
 5	371	1703806969731516883	CMakeFiles/compiler.dir/src/generation.cpp.o	d94cb79bc35ce5ad
+19	442	1703807656585808594	CMakeFiles/compiler.dir/src/generation.cpp.o	d94cb79bc35ce5ad
+19	466	1703807656610405005	CMakeFiles/compiler.dir/src/parser.cpp.o	c69bac305adbe351
+18	475	1703807656619090956	CMakeFiles/compiler.dir/src/tokenization.cpp.o	599a7f19b6c3feb5
+18	520	1703807656663843824	CMakeFiles/compiler.dir/src/main.cpp.o	3c57cd84b84b544d
+520	698	1703807656841787182	compiler	a0a8dbd5f3f85aa4
+5	415	1703808195836596589	CMakeFiles/compiler.dir/src/generation.cpp.o	d94cb79bc35ce5ad
+5	444	1703808195861291540	CMakeFiles/compiler.dir/src/parser.cpp.o	c69bac305adbe351
+5	460	1703808195882103574	CMakeFiles/compiler.dir/src/tokenization.cpp.o	599a7f19b6c3feb5
+4	494	1703808195916967836	CMakeFiles/compiler.dir/src/main.cpp.o	3c57cd84b84b544d
+494	663	1703808196085481751	compiler	a0a8dbd5f3f85aa4
+6	406	1703808236657009234	CMakeFiles/compiler.dir/src/generation.cpp.o	d94cb79bc35ce5ad
+6	445	1703808236696245284	CMakeFiles/compiler.dir/src/parser.cpp.o	c69bac305adbe351
+6	485	1703808236737210192	CMakeFiles/compiler.dir/src/main.cpp.o	3c57cd84b84b544d
+486	659	1703808236909522609	compiler	a0a8dbd5f3f85aa4
