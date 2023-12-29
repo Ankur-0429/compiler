@@ -8,6 +8,11 @@ enum class TokenType {
     exit,
     integer_literal,
     semi_colon,
+    open_parenthesis,
+    closed_parenthesis,
+    identifier,
+    let,
+    equals
 };
 
 struct Token {

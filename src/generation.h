@@ -5,9 +5,11 @@
 
 class Generator {
 public:
-    explicit Generator(NodeExit root): m_root(std::move(root)) {};
+    explicit Generator(NodeProgram program): m_program(std::move(program)) {};
 
-    [[nodiscard]] std::string generate_exit() const;
+    [[nodiscard]] std::string generate_program() const;
+    [[nodiscard]] std::string generate_statement(const NodeStatement& statement) const;
+    [[nodiscard]] std::string generate_expression(NodeExpression expression) const;
 private:
-    const NodeExit m_root;
+    const NodeProgram m_program;
 };

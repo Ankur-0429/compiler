@@ -16,9 +16,13 @@ std::vector<Token> Tokenizer::tokenize() {
                 tokens.push_back({.type = TokenType::exit});
                 buf.clear();
                 continue;
+            } else if (buf == "let") {
+                tokens.push_back({.type = TokenType::let, .value = buf});
+                buf.clear();
             } else {
-                std::cerr << "exit keyword not found" << std::endl;
-                exit(EXIT_FAILURE);
+                tokens.push_back({.type = TokenType::identifier, .value = buf});
+                buf.clear();
+                continue;
             }
         } else if (std::isdigit(peek().value())) {
             buf.push_back(consume());
@@ -28,9 +32,21 @@ std::vector<Token> Tokenizer::tokenize() {
             tokens.push_back({.type = TokenType::integer_literal, .value = buf});
             buf.clear();
             continue;
+        } else if (peek().value() == '(') {
+            consume();
+            tokens.push_back({.type = TokenType::open_parenthesis});
+            continue;
+        } else if (peek().value() == ')') {
+            consume();
+            tokens.push_back({.type = TokenType::closed_parenthesis});
+            continue;
         } else if (peek().value() == ';') {
             consume();
             tokens.push_back({.type = TokenType::semi_colon});
+            continue;
+        } else if (peek().value() == '=') {
+            consume();
+            tokens.push_back({.type = TokenType::equals});
             continue;
         } else if (std::isspace(peek().value())) {
             consume();

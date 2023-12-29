@@ -25,17 +25,17 @@ int main(int argc, char* argv[]) {
 
     std::vector<Token> tokens = tokenizer.tokenize();
     Parser parser(tokens);
-    std::optional<NodeExit> tree = parser.parse();
+    std::optional<NodeProgram> program = parser.parse_program();
 
-    if (!tree.has_value()) {
-        std::cerr << "Unable to parse correctly" << std::endl;
+    if (!program.has_value()) {
+        std::cerr << "Invalid Program" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    Generator generator(tree.value());
+    Generator generator(program.value());
     {
         std::fstream file("out.s", std::ios::out);
-        file << generator.generate_exit();
+        file << generator.generate_program();
     }
 
     system("as out.s -o out.o");
