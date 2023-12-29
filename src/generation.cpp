@@ -2,60 +2,68 @@
 #include <iostream>
 #include "generation.h"
 
- std::string Generator::generate_expression(NodeExpression expression) const {
+void Generator::generate_expression(NodeExpression expression) {
 
     struct ExpressionVisitor {
-        std::stringstream output_stream;
+        Generator& generator;
+        explicit ExpressionVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
         void operator()(const NodeExpressionIntegerLiteral& integerLiteral) {
-            output_stream << "    mov x1, #" << integerLiteral.integer_literal.value.value() << "\n";
-            output_stream << "    sub sp, sp, #16\n";
-            output_stream << "    str x1, [sp, #0]\n";
+            generator.memory_stack_push(integerLiteral.integer_literal.value.value());
         }
-        void operator()(const NodeExpressionIdentifier identifier) {
+        void operator()(const NodeExpressionIdentifier& identifier) {
+            if (generator.m_vars.find(identifier.identifier.value.value()) == generator.m_vars.end()) {
+                std::cerr << "Undeclared Identifier: " << identifier.identifier.value.value() << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            const auto& var = generator.m_vars.at(identifier.identifier.value.value());
+            size_t offset = generator.m_stack_size - var.stack_loc;
 
+            generator.m_output_stream << "    ldr x1, [sp, #" << 16*(offset-1) << "]\n";
+            generator.memory_stack_push(1);
         }
     };
 
-    ExpressionVisitor visitor;
+    ExpressionVisitor visitor(*this);;
     std::visit(visitor, expression.variant);
-    return visitor.output_stream.str();
 }
 
-std::string Generator::generate_statement(const NodeStatement& statement) const {
+void Generator::generate_statement(const NodeStatement& statement) {
     struct StatementVisitor {
-        std::stringstream output_stream;
-        const Generator& generator;
-        explicit StatementVisitor(const Generator& gen) : generator(gen) {}
+        Generator& generator;
+        explicit StatementVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
 
         void operator()(const NodeStatementExit& statement_exit) {
-            output_stream << generator.generate_expression(statement_exit.expr);
-            output_stream << "    ldr x2, [sp, #0]\n";
-            output_stream << "    add sp, sp, #16\n";
-            output_stream << "    mov x0, x2\n";
-            output_stream << "    mov x16, #1\n";
-            output_stream << "    svc 0\n";
+            generator.generate_expression(statement_exit.expr);
+            generator.memory_stack_pop();
+            generator.m_output_stream << "    mov x0, x2\n";
+            generator.m_output_stream << "    mov x16, #1\n";
+            generator.m_output_stream << "    svc 0\n";
         }
-        void operator()(const NodeStatementLet statement_let) {
+        void operator()(const NodeStatementLet& statement_let) {
+            if (generator.m_vars.find(statement_let.Identifier.value.value()) != generator.m_vars.end()) {
+                std::cerr << "Identifier already used: " << statement_let.Identifier.value.value() << "\n";
+                exit(EXIT_FAILURE);
+            }
 
+            generator.m_vars.insert({statement_let.Identifier.value.value(), Var {.stack_loc = generator.m_stack_size}});
+            generator.generate_expression(statement_let.expr);
         }
     };
 
     StatementVisitor visitor(*this);
     std::visit(visitor, statement.var);
-    return visitor.output_stream.str();
 }
 
-std::string Generator::generate_program() const {
-    std::stringstream output_stream;
-    output_stream << ".global _main\n.align 2\n_main:\n";
+std::string Generator::generate_program() {
+    m_output_stream << ".global _main\n.align 2\n_main:\n";
 
     for (const NodeStatement& statement : m_program.statement) {
-        output_stream << generate_statement(statement);
+        generate_statement(statement);
     }
 
-    output_stream << "    mov x0, #0\n";
-    output_stream << "    mov x16, #1\n";
-    output_stream << "    svc 0";
+    m_output_stream << "    mov x0, #0\n";
+    m_output_stream << "    mov x16, #1\n";
+    m_output_stream << "    svc 0";
 
-    return output_stream.str();
+    return m_output_stream.str();
 }
