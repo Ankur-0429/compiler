@@ -12,7 +12,8 @@ enum class TokenType {
     closed_parenthesis,
     identifier,
     let,
-    equals
+    equals,
+    plus
 };
 
 struct Token {

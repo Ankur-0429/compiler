@@ -4,11 +4,11 @@
 #include "arenaAllocator.h"
 #include <variant>
 
-struct NodeExpressionIntegerLiteral {
+struct NodeTermIntegerLiteral {
     Token integer_literal;
 };
 
-struct NodeExpressionIdentifier {
+struct NodeTermIdentifier {
     Token identifier;
 };
 
@@ -28,8 +28,12 @@ struct NodeBinaryExpression {
     std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*> var;
 };
 
+struct NodeTerm {
+    std::variant<NodeTermIntegerLiteral*, NodeTermIdentifier*> var;
+};
+
 struct NodeExpression {
-    std::variant<NodeExpressionIntegerLiteral*, NodeExpressionIdentifier*, NodeBinaryExpression*> variant;
+    std::variant<NodeTerm*, NodeBinaryExpression*> variant;
 };
 
 struct NodeStatementExit {
@@ -55,6 +59,8 @@ public:
     m_tokens(tokens),
     m_allocator(1024*1024*4){}
     std::optional<NodeExpression*> parse_expr();
+    std::optional<NodeBinaryExpression*> parse_binary_expr();
+    std::optional<NodeTerm*> parse_term();
     std::optional<NodeStatement*> parse_statement();
     std::optional<NodeProgram> parse_program();
 private:

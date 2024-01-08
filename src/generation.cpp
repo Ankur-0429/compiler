@@ -3,15 +3,14 @@
 #include <cassert>
 #include "generation.h"
 
-void Generator::generate_expression(NodeExpression* expression) {
-
-    struct ExpressionVisitor {
+void Generator::generate_term(const NodeTerm* term) {
+    struct TermVisitor {
         Generator& generator;
-        explicit ExpressionVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
-        void operator()(const NodeExpressionIntegerLiteral* integerLiteral) {
-            generator.memory_stack_push(integerLiteral->integer_literal.value.value());
+        explicit TermVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
+        void operator()(const NodeTermIntegerLiteral* integer_literal) const {
+            generator.memory_stack_push(integer_literal->integer_literal.value.value());
         }
-        void operator()(const NodeExpressionIdentifier* identifier) {
+        void operator()(const NodeTermIdentifier* identifier) const {
             if (generator.m_vars.find(identifier->identifier.value.value()) == generator.m_vars.end()) {
                 std::cerr << "Undeclared Identifier: " << identifier->identifier.value.value() << std::endl;
                 exit(EXIT_FAILURE);
@@ -22,8 +21,30 @@ void Generator::generate_expression(NodeExpression* expression) {
             generator.m_output_stream << "    ldr x1, [sp, #" << 16*(offset-1) << "]\n";
             generator.memory_stack_push(1);
         }
+    };
+    TermVisitor visitor(*this);;
+    std::visit(visitor, term->var);
+}
+
+void Generator::generate_expression(NodeExpression* expression) {
+
+    struct ExpressionVisitor {
+        Generator& generator;
+        explicit ExpressionVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
+        void operator()(const NodeTerm* term) {
+            generator.generate_term(term);
+        }
         void operator()(const NodeBinaryExpression* binary_expr) {
-            assert(false); // Not Implemented
+            if (std::holds_alternative<NodeBinaryExpressionAdd*>(binary_expr->var)) {
+                NodeBinaryExpressionAdd* add_expr = std::get<NodeBinaryExpressionAdd*>(binary_expr->var);
+                generator.generate_expression(add_expr->lhs);
+                generator.generate_expression(add_expr->rhs);
+                generator.memory_stack_pop(3);
+                generator.memory_stack_pop(4);
+
+                generator.m_output_stream << "    add x1, x3, x4\n";
+                generator.memory_stack_push(1);
+            }
         }
     };
 
@@ -51,10 +72,6 @@ void Generator::generate_statement(const NodeStatement* statement) {
 
             generator.m_vars.insert({statement_let->Identifier.value.value(), Var {.stack_loc = generator.m_stack_size}});
             generator.generate_expression(statement_let->expr);
-        }
-
-        void operator()(const NodeBinaryExpression* binary_expr) {
-            assert(false); // not implemented
         }
     };
 

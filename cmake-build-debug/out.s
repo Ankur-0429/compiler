@@ -1,7 +1,18 @@
 .global _main
 .align 2
 _main:
-    mov x1, #56
+    ldr x1, =14
+    sub sp, sp, #16
+    str x1, [sp, #0]
+    ldr x1, =240
+    sub sp, sp, #16
+    str x1, [sp, #0]
+    ldr x3, [sp, #0]
+    add sp, sp, #16
+    ldr x4, [sp, #0]
+    add sp, sp, #16
+    add x1, x3, x4
+    mov x1, x1
     sub sp, sp, #16
     str x1, [sp, #0]
     ldr x1, [sp, #0]
