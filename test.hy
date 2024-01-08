@@ -1,4 +1,5 @@
-let x = 7;
-let y = x;
+let xed = 56;
+let y = xed;
 let z = y;
-exit(z);
+let d = z;
+exit(d);

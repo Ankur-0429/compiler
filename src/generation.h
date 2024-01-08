@@ -8,8 +8,8 @@ public:
     explicit Generator(NodeProgram program): m_program(std::move(program)) {};
 
     std::string generate_program();
-    void generate_statement(const NodeStatement& statement);
-    void generate_expression(NodeExpression expression);
+    void generate_statement(const NodeStatement* statement);
+    void generate_expression(NodeExpression* expression);
 private:
     const NodeProgram m_program;
     struct Var {

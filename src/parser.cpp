@@ -12,23 +12,31 @@ Token Parser::consume() {
     return m_tokens.at(m_current_index++);
 }
 
-std::optional<NodeExpression> Parser::parse_expr() {
+std::optional<NodeExpression*> Parser::parse_expr() {
     if (peek().has_value() && peek().value().type == TokenType::integer_literal) {
-        return NodeExpression{.variant = NodeExpressionIntegerLiteral {.integer_literal = consume()}};
+        auto node_expr_integer_literal = m_allocator.allocate<NodeExpressionIntegerLiteral>();
+        node_expr_integer_literal->integer_literal = consume();
+        auto node_expression = m_allocator.allocate<NodeExpression>();
+        node_expression->variant = node_expr_integer_literal;
+        return node_expression;
     } else if (peek().has_value() && peek().value().type == TokenType::identifier) {
-        return NodeExpression{.variant = NodeExpressionIdentifier {.identifier = consume()}};
+        auto expression_identifier = m_allocator.allocate<NodeExpressionIdentifier>();
+        expression_identifier->identifier = consume();
+        auto expr = m_allocator.allocate<NodeExpression>();
+        expr->variant = expression_identifier;
+        return expr;
     }
     return {};
 }
 
-std::optional<NodeStatement> Parser::parse_statement() {
+std::optional<NodeStatement*> Parser::parse_statement() {
     if (peek().value().type == TokenType::exit && peek(1).has_value() && peek(1).value().type == TokenType::open_parenthesis) {
         consume();
         consume();
 
-        NodeStatementExit statement_exit;
+        auto node_statement_exit = m_allocator.allocate<NodeStatementExit>();
         if (auto node_expr = parse_expr()) {
-            statement_exit = NodeStatementExit {.expr = node_expr.value()};
+            node_statement_exit->expr = node_expr.value();
         } else {
             std::cerr << "Invalid expression parse" << std::endl;
             exit(EXIT_FAILURE);
@@ -49,16 +57,21 @@ std::optional<NodeStatement> Parser::parse_statement() {
             exit(EXIT_FAILURE);
         }
 
-        return NodeStatement {.var = statement_exit};
+        auto node_statement = m_allocator.allocate<NodeStatement>();
+        node_statement->var = node_statement_exit;
+        return node_statement;
     } else if (peek().has_value() && peek().value().type == TokenType::let) {
         if (peek(1).has_value() && peek(1).value().type == TokenType::identifier) {
             if (peek(2).has_value() && peek(2).value().type == TokenType::equals) {
                 consume();
-                auto statement_let = NodeStatementLet{.Identifier = consume()};
+
+                auto statement_let = m_allocator.allocate<NodeStatementLet>();
+                statement_let->Identifier = consume();
+
                 consume();
 
                 if (auto expr = parse_expr()) {
-                    statement_let.expr = expr.value();
+                    statement_let->expr = expr.value();
                 } else {
                     std::cerr << "Invalid expression parsing" << std::endl;
                     exit(EXIT_FAILURE);
@@ -70,7 +83,10 @@ std::optional<NodeStatement> Parser::parse_statement() {
                     std::cerr << "Expected semi-colon" << std::endl;
                     exit(EXIT_FAILURE);
                 }
-                return NodeStatement{.var = statement_let};
+
+                auto node_statement = m_allocator.allocate<NodeStatement>();
+                node_statement->var = statement_let;
+                return node_statement;
             }
         }
     }

@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "tokenization.h"
 #include "generation.h"
+#include "arenaAllocator.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
