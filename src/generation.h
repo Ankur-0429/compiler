@@ -24,7 +24,7 @@ private:
         m_stack_size++;
     }
 
-    void memory_stack_push(int registerNumber) {
+    void memory_stack_push(int registerNumber = 2) {
         m_output_stream << "    mov x1, x" << registerNumber << "\n";
         m_output_stream << "    sub sp, sp, #16\n";
         m_output_stream << "    str x1, [sp, #0]\n";

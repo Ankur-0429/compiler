@@ -19,6 +19,7 @@ std::vector<Token> Tokenizer::tokenize() {
             } else if (buf == "let") {
                 tokens.push_back({.type = TokenType::let, .value = buf});
                 buf.clear();
+                continue;
             } else {
                 tokens.push_back({.type = TokenType::identifier, .value = buf});
                 buf.clear();
