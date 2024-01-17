@@ -242,3 +242,37 @@ Parsed CXX implicit link information from above output:
   implicit fwks: []
 
 
+Performing C SOURCE FILE Test HAVE_FFI_CALL succeeded with the following output:
+Change Dir: /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-op1GPJ
+
+Run Build Command(s):/Applications/CLion.app/Contents/bin/ninja/mac/ninja cmTC_e7b09 && [1/2] Building C object CMakeFiles/cmTC_e7b09.dir/src.c.o
+[2/2] Linking C executable cmTC_e7b09
+
+
+Source file was:
+
+    struct ffi_cif;
+    typedef struct ffi_cif ffi_cif;
+    void ffi_call(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue);
+    int main(void) { ffi_call(0, 0, 0, 0); }
+
+Determining if the include file histedit.h exists passed with the following output:
+Change Dir: /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-4gtw0j
+
+Run Build Command(s):/Applications/CLion.app/Contents/bin/ninja/mac/ninja cmTC_7c550 && [1/2] Building C object CMakeFiles/cmTC_7c550.dir/CheckIncludeFile.c.o
+[2/2] Linking C executable cmTC_7c550
+
+
+
+Performing C SOURCE FILE Test Terminfo_LINKABLE succeeded with the following output:
+Change Dir: /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-CyRhvP
+
+Run Build Command(s):/Applications/CLion.app/Contents/bin/ninja/mac/ninja cmTC_7c09e && [1/2] Building C object CMakeFiles/cmTC_7c09e.dir/src.c.o
+[2/2] Linking C executable cmTC_7c09e
+
+
+Source file was:
+
+    int setupterm(char *term, int filedes, int *errret);
+    int main(void) { return setupterm(0, 0, 0); }
+
