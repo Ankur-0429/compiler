@@ -22,3 +22,15 @@ jobs:
         run: |
           cmake .
           make
+
+      - name: Run Tests
+        run: |
+          ./compiler > output.txt
+          actual_result=$(tail -n 1 output.txt)
+          expected_result="5"
+          if [ "$actual_result" == "$expected_result" ]; then
+            echo "Test Passed!"
+          else
+            echo "Test Failed! Expected: $expected_result, Actual: $actual_result"
+            exit 1
+          fi
