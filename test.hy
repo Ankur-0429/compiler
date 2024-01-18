@@ -1,5 +1,4 @@
-let xed = 14 + 240 + 1;
-let y = xed;
+let x = 5;
+let y = x;
 let z = y;
-let d = z;
-exit(d);
+exit(z);

@@ -35,12 +35,15 @@ int main(int argc, char* argv[]) {
 
     Generator generator(program.value());
     {
-        std::fstream file("out.s", std::ios::out);
+        std::fstream file("out.ll", std::ios::out);
         file << generator.generate_program();
     }
 
-    system("as out.s -o out.o");
-    system("ld out.o -o out");
+    std::string llc_command = "clang -O3 -o out out.ll";
+    if (std::system(llc_command.c_str()) != 0) {
+        std::cerr << "Error running clang\n";
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

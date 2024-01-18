@@ -3,53 +3,56 @@
 #include <cassert>
 #include "generation.h"
 
-void Generator::generate_term(const NodeTerm* term) {
+llvm::Value* Generator::generate_term(const NodeTerm* term) {
     struct TermVisitor {
         Generator& generator;
+        mutable llvm::Value* result{};
         explicit TermVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
         void operator()(const NodeTermIntegerLiteral* integer_literal) const {
-            generator.memory_stack_push(integer_literal->integer_literal.value.value());
+            result = generator.m_builder.getInt32(std::stoi(integer_literal->integer_literal.value.value()));
         }
         void operator()(const NodeTermIdentifier* identifier) const {
             if (generator.m_vars.find(identifier->identifier.value.value()) == generator.m_vars.end()) {
                 std::cerr << "Undeclared Identifier: " << identifier->identifier.value.value() << std::endl;
                 exit(EXIT_FAILURE);
             }
-            const auto& var = generator.m_vars.at(identifier->identifier.value.value());
-            size_t offset = generator.m_stack_size - var.stack_loc;
-
-            generator.m_output_stream << "    ldr x1, [sp, #" << 16*(offset-1) << "]\n";
-            generator.memory_stack_push(1);
+            result = generator.m_vars.at(identifier->identifier.value.value());
         }
     };
     TermVisitor visitor(*this);;
     std::visit(visitor, term->var);
+    return visitor.result;
 }
 
-void Generator::generate_expression(NodeExpression* expression) {
-
+llvm::Value* Generator::generate_expression(NodeExpression* expression) {
     struct ExpressionVisitor {
         Generator& generator;
+        llvm::Value* result{};
         explicit ExpressionVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
+
         void operator()(const NodeTerm* term) {
-            generator.generate_term(term);
+            result = generator.generate_term(term);
         }
+
         void operator()(const NodeBinaryExpression* binary_expr) {
             if (std::holds_alternative<NodeBinaryExpressionAdd*>(binary_expr->var)) {
                 NodeBinaryExpressionAdd* add_expr = std::get<NodeBinaryExpressionAdd*>(binary_expr->var);
-                generator.generate_expression(add_expr->lhs);
-                generator.generate_expression(add_expr->rhs);
-                generator.memory_stack_pop(3);
-                generator.memory_stack_pop(4);
 
-                generator.m_output_stream << "    add x1, x3, x4\n";
-                generator.memory_stack_push(1);
+                llvm::Value* lhsValue = generator.generate_expression(add_expr->lhs);
+                llvm::Value* rhsValue = generator.generate_expression(add_expr->rhs);
+
+                llvm::Value* resultValue = generator.m_builder.CreateAdd(lhsValue, rhsValue);
+                result = resultValue;
+            } else {
+                std::cerr << "operation not allowed" << std::endl;
+                exit(EXIT_FAILURE);
             }
         }
     };
 
-    ExpressionVisitor visitor(*this);;
+    ExpressionVisitor visitor(*this);
     std::visit(visitor, expression->variant);
+    return visitor.result;
 }
 
 void Generator::generate_statement(const NodeStatement* statement) {
@@ -58,11 +61,11 @@ void Generator::generate_statement(const NodeStatement* statement) {
         explicit StatementVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
 
         void operator()(const NodeStatementExit* statement_exit) {
-            generator.generate_expression(statement_exit->expr);
-            generator.memory_stack_pop();
-            generator.m_output_stream << "    mov x0, x2\n";
-            generator.m_output_stream << "    mov x16, #1\n";
-            generator.m_output_stream << "    svc 0\n";
+            llvm::Value* exitValue = generator.generate_expression(statement_exit->expr);
+            generator.m_builder.CreateStore(exitValue, generator.m_builder.CreateAlloca(exitValue->getType()));
+            llvm::FunctionType* exitFuncType = llvm::FunctionType::get(generator.m_builder.getInt32Ty(), false);
+            llvm::FunctionCallee exitFunc = generator.m_module.getOrInsertFunction("exit", exitFuncType);
+            generator.m_builder.CreateCall(exitFunc, {exitValue});
         }
         void operator()(const NodeStatementLet* statement_let) {
             if (generator.m_vars.find(statement_let->Identifier.value.value()) != generator.m_vars.end()) {
@@ -70,8 +73,10 @@ void Generator::generate_statement(const NodeStatement* statement) {
                 exit(EXIT_FAILURE);
             }
 
-            generator.m_vars.insert({statement_let->Identifier.value.value(), Var {.stack_loc = generator.m_stack_size}});
-            generator.generate_expression(statement_let->expr);
+//            llvm::AllocaInst* allocaInst = generator.m_builder.CreateAlloca(generator.m_builder.getInt32Ty(), nullptr, statement_let->Identifier.value.value());
+            llvm::Value* letValue = generator.generate_expression(statement_let->expr);
+//            generator.m_builder.CreateStore(letValue, allocaInst);
+            generator.m_vars.insert({statement_let->Identifier.value.value(), letValue});
         }
     };
 
@@ -80,15 +85,20 @@ void Generator::generate_statement(const NodeStatement* statement) {
 }
 
 std::string Generator::generate_program() {
-    m_output_stream << ".global _main\n.align 2\n_main:\n";
+    llvm::FunctionType* mainFuncType = llvm::FunctionType::get(m_builder.getInt32Ty(), false);
+    llvm::Function* mainFunc = llvm::Function::Create(mainFuncType, llvm::Function::ExternalLinkage, "main", &m_module);
+    llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(m_context, "entry", mainFunc);
+    m_builder.SetInsertPoint(entryBlock);
 
     for (const NodeStatement* statement : m_program.statement) {
         generate_statement(statement);
     }
 
-    m_output_stream << "    mov x0, #0\n";
-    m_output_stream << "    mov x16, #1\n";
-    m_output_stream << "    svc 0";
+    m_builder.CreateRet(m_builder.getInt32(0));
 
-    return m_output_stream.str();
+    std::string irCode;
+    llvm::raw_string_ostream irStream(irCode);
+    m_module.print(irStream, nullptr);
+
+    return irCode;
 }
