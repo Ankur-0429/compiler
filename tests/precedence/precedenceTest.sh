@@ -10,7 +10,7 @@ for ((i=0; i<${#hy_files[@]}; i++)); do
 
     echo "Running test for $file"
 
-    ../../cmake-build-debug/hydro "$file" ./test
+    cmake-build-debug/hydro "$file" ./test
 
     actual_exit_code=$?
 
