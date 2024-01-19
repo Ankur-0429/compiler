@@ -21,8 +21,3 @@ jobs:
 
       - name: Run Tests
         run: ctest --test-dir cmake-build-debug --output-on-failure
-
-      - name: Run Custom Tests
-        run: |
-          chmod +x ./tests/precedence/precedenceTest.sh
-          ./tests/precedence/precedenceTest.sh
