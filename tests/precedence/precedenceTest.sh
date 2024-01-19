@@ -1,6 +1,6 @@
 #!/bin/bash
 
-hy_files=("cases/test1.hy")
+hy_files=("tests/precedence/cases/test1.hy")
 expected_exit_codes=(32)
 
 # Loop through each file
