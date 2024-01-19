@@ -22,7 +22,7 @@ find_package(LLVM REQUIRED CONFIG)
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
-add_executable(compiler src/main.cpp include/tokenization.h src/tokenization.cpp src/parser.cpp include/parser.h src/generation.cpp include/generation.h include/arenaAllocator.h)
+add_executable(hydro src/main.cpp include/tokenization.h src/tokenization.cpp src/parser.cpp include/parser.h src/generation.cpp include/generation.h include/arenaAllocator.h)
 
 llvm_map_components_to_libnames(llvm_libs support core irreader)
-target_link_libraries(compiler ${llvm_libs})
+target_link_libraries(hydro ${llvm_libs})

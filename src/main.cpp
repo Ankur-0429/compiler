@@ -8,15 +8,18 @@
 #include "../include/arenaAllocator.h"
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
+    if (argc != 3) {
         std::cerr << "Incorrect Usage" << std::endl;
-        std::cerr << "hydro <input.hy>" << std::endl;
+        std::cerr << "hydro <input.hy> <output_file>" << std::endl;
         return EXIT_FAILURE;
     }
 
+    std::string inputFileName = argv[1];
+    std::string outputFileName = argv[2];
+
     std::string contents;
     {
-        std::fstream file(argv[1], std::ios::in);
+        std::fstream file(inputFileName, std::ios::in);
         std::stringstream contents_stream;
         contents_stream << file.rdbuf();
         contents = contents_stream.str();
@@ -35,9 +38,17 @@ int main(int argc, char* argv[]) {
 
     Generator generator(program.value());
     {
-        std::fstream file("out.ll", std::ios::out);
+        std::fstream file(outputFileName + ".ll", std::ios::out);
         file << generator.generate_program();
     }
+
+    std::string llc_command = "clang -O3 -o " + outputFileName + " " + outputFileName + ".ll";
+    if (std::system(llc_command.c_str()) != 0) {
+        std::cerr << "Error running clang\n";
+        return EXIT_FAILURE;
+    }
+
+    std::remove((outputFileName + ".ll").c_str());
 
     return EXIT_SUCCESS;
 }
