@@ -55,35 +55,59 @@ std::optional<NodeTerm*> Parser::parse_term() {
     return {};
 }
 
-std::optional<NodeExpression*> Parser::parse_expr() {
-    if (auto term = parse_term()) {
-        if (peek().has_value() && peek().value().type == TokenType::plus) {
-            auto bin_expr = m_allocator.allocate<NodeBinaryExpression>();
-            auto bin_expr_add = m_allocator.allocate<NodeBinaryExpressionAdd>();
+std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
+    std::optional<NodeTerm*> lhs = parse_term();
+    if (!lhs.has_value()) {
+        return {};
+    }
+    auto* expr_lhs = m_allocator.allocate<NodeExpression>();
+    expr_lhs->var = lhs.value();
 
-            auto lsh_expr = m_allocator.allocate<NodeExpression>();
-            lsh_expr->var = term.value();
-            bin_expr_add->lhs = lsh_expr;
-
-            consume();
-
-            if (auto rhs = parse_expr()) {
-                bin_expr_add->rhs = rhs.value();
-                bin_expr->var = bin_expr_add;
-                auto expr = m_allocator.allocate<NodeExpression>();
-                expr->var = bin_expr;
-                return expr;
-            } else {
-                std::cerr << "Expected rhs expression" << std::endl;
-                exit(EXIT_FAILURE);
-            }
+    while (true) {
+        std::optional<Token> current_token = peek();
+        std::optional<int> prec{};
+        if (!current_token.has_value()) {
+            break;
         }
 
-        auto expr = m_allocator.allocate<NodeExpression>();
-        expr->var = term.value();
-        return expr;
+        if (current_token->type == TokenType::plus) {
+            prec = 0;
+        } else if (current_token->type == TokenType::star) {
+            prec = 1;
+        }
+        if (!prec.has_value() || prec < min_prec) {
+            break;
+        }
+
+        Token op = consume();
+        int next_minimum_prec = prec.value() + 1;
+
+        std::optional<NodeExpression*> expr_rhs = parse_expr(next_minimum_prec);
+        if (!expr_rhs.has_value()) {
+            std::cerr << "right expression should have value" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        auto* node_binary_expression = m_allocator.allocate<NodeBinaryExpression>();
+        auto* node_expression = m_allocator.allocate<NodeExpression>();
+
+        if (op.type == TokenType::plus) {
+            auto* add = m_allocator.allocate<NodeBinaryExpressionAdd>();
+            node_expression->var = expr_lhs->var;
+            add->lhs = node_expression;
+            add->rhs = expr_rhs.value();
+            node_binary_expression->var = add;
+        } else if (op.type == TokenType::star) {
+            auto* mult = m_allocator.allocate<NodeBinaryExpressionMultiplication>();
+            node_expression->var = expr_lhs->var;
+            mult->lhs = node_expression;
+            mult->rhs = expr_rhs.value();
+            node_binary_expression->var = mult;
+        }
+
+        expr_lhs->var = node_binary_expression;
     }
-    return {};
+    return expr_lhs;
 }
 
 std::optional<NodeStatement*> Parser::parse_statement() {

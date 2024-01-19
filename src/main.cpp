@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    std::remove((outputFileName + ".ll").c_str());
+//    std::remove((outputFileName + ".ll").c_str());
 
     return EXIT_SUCCESS;
 }

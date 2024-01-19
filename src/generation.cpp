@@ -38,8 +38,12 @@ llvm::Value* Generator::generate_binary_expression(const NodeBinaryExpression* b
             result = resultValue;
         }
 
-        void operator()(const NodeBinaryExpressionMultiplication* mult) {
-            return;
+        void operator()(const NodeBinaryExpressionMultiplication* mult_expr) {
+            llvm::Value* lhsValue = generator.generate_expression(mult_expr->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(mult_expr->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateMul(lhsValue, rhsValue);
+            result = resultValue;
         }
     };
 

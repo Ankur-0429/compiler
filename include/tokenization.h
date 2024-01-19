@@ -25,7 +25,6 @@ struct Token {
 class Tokenizer {
 public:
     explicit Tokenizer(std::string& src);
-
     std::vector<Token> tokenize();
 
 private:
