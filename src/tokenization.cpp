@@ -15,15 +15,12 @@ std::vector<Token> Tokenizer::tokenize() {
             if (buf == "exit") {
                 tokens.push_back({.type = TokenType::exit});
                 buf.clear();
-                continue;
-            } else if (buf == "let") {
-                tokens.push_back({.type = TokenType::let, .value = buf});
+            } else if (buf == "uint32") {
+                tokens.push_back({.type = TokenType::uint32, .value = buf});
                 buf.clear();
-                continue;
             } else {
                 tokens.push_back({.type = TokenType::identifier, .value = buf});
                 buf.clear();
-                continue;
             }
         } else if (std::isdigit(peek().value())) {
             buf.push_back(consume());
@@ -52,7 +49,13 @@ std::vector<Token> Tokenizer::tokenize() {
         } else if (peek().value() == '*') {
             consume();
             tokens.push_back({.type = TokenType::star});
-        }  else {
+        } else if (peek().value() == '-') {
+            consume();
+            tokens.push_back({.type = TokenType::sub});
+        } else if (peek().value() == '/') {
+            consume();
+            tokens.push_back({.type = TokenType::div});
+        } else {
             std::cerr << "tokenization failed" << std::endl;
             exit(EXIT_FAILURE);
         }

@@ -38,17 +38,17 @@ int main(int argc, char* argv[]) {
 
     Generator generator(program.value());
     {
-        std::fstream file(outputFileName + ".ll", std::ios::out);
+        std::fstream file("out.ll", std::ios::out);
         file << generator.generate_program();
     }
 
-    std::string llc_command = "clang -O3 -o " + outputFileName + " " + outputFileName + ".ll";
+    std::string llc_command = "clang -O3 -o " + outputFileName + " " + "out.ll";
     if (std::system(llc_command.c_str()) != 0) {
         std::cerr << "Error running clang\n";
         return EXIT_FAILURE;
     }
 
-//    std::remove((outputFileName + ".ll").c_str());
+//    std::remove("out.ll");
 
     return EXIT_SUCCESS;
 }

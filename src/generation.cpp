@@ -18,6 +18,9 @@ llvm::Value* Generator::generate_term(const NodeTerm* term) {
             }
             result = generator.m_vars.at(identifier->identifier.value.value());
         }
+        void operator()(const NodeTermParenthesis* parenthesis) const {
+            result = generator.generate_expression(parenthesis->expr);
+        }
     };
     TermVisitor visitor(*this);;
     std::visit(visitor, term->var);
@@ -43,6 +46,22 @@ llvm::Value* Generator::generate_binary_expression(const NodeBinaryExpression* b
             llvm::Value* rhsValue = generator.generate_expression(mult_expr->rhs);
 
             llvm::Value* resultValue = generator.m_builder.CreateMul(lhsValue, rhsValue);
+            result = resultValue;
+        }
+
+        void operator()(const NodeBinaryExpressionSubtraction* mult_expr) {
+            llvm::Value* lhsValue = generator.generate_expression(mult_expr->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(mult_expr->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateSub(lhsValue, rhsValue);
+            result = resultValue;
+        }
+
+        void operator()(const NodeBinaryExpressionDivision* mult_expr) {
+            llvm::Value* lhsValue = generator.generate_expression(mult_expr->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(mult_expr->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateSDiv(lhsValue, rhsValue);
             result = resultValue;
         }
     };
@@ -84,14 +103,20 @@ void Generator::generate_statement(const NodeStatement* statement) {
             llvm::FunctionCallee exitFunc = generator.m_module.getOrInsertFunction("exit", exitFuncType);
             generator.m_builder.CreateCall(exitFunc, {exitValue});
         }
-        void operator()(const NodeStatementLet* statement_let) {
-            if (generator.m_vars.find(statement_let->Identifier.value.value()) != generator.m_vars.end()) {
-                std::cerr << "Identifier already used: " << statement_let->Identifier.value.value() << "\n";
+        void operator()(const NodeStatementUInt32* statement_uint32) {
+            if (generator.m_vars.find(statement_uint32->Identifier.value.value()) != generator.m_vars.end()) {
+                std::cerr << "Identifier already used: " << statement_uint32->Identifier.value.value() << "\n";
                 exit(EXIT_FAILURE);
             }
 
-            llvm::Value* letValue = generator.generate_expression(statement_let->expr);
-            generator.m_vars.insert({statement_let->Identifier.value.value(), letValue});
+            llvm::Value* letValue = generator.generate_expression(statement_uint32->expr);
+
+            if (!letValue->getType()->isIntegerTy(32)) {
+                std::cerr << "Error: Variable type must be an unsigned 32-bit integer.\n";
+                exit(EXIT_FAILURE);
+            }
+
+            generator.m_vars.insert({statement_uint32->Identifier.value.value(), letValue});
         }
     };
 

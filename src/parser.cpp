@@ -51,6 +51,26 @@ std::optional<NodeTerm*> Parser::parse_term() {
         auto node_term = m_allocator.allocate<NodeTerm>();
         node_term->var = node_term_identifier;
         return node_term;
+    } else if (peek().has_value() && peek().value().type == TokenType::open_parenthesis) {
+        consume();
+
+        auto expr = parse_expr();
+        if (!expr.has_value()) {
+            std::cerr << "expected expression" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        if (!peek().has_value() || peek().value().type != TokenType::closed_parenthesis) {
+            std::cerr << "expected closed parenthesis" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        consume();
+
+        auto term_parenthesis = m_allocator.allocate<NodeTermParenthesis>();
+        term_parenthesis->expr = expr.value();
+        auto term = m_allocator.allocate<NodeTerm>();
+        term->var = term_parenthesis;
+        return term;
     }
     return {};
 }
@@ -70,9 +90,9 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
             break;
         }
 
-        if (current_token->type == TokenType::plus) {
+        if (current_token->type == TokenType::plus || current_token->type == TokenType::sub) {
             prec = 0;
-        } else if (current_token->type == TokenType::star) {
+        } else if (current_token->type == TokenType::star || current_token->type == TokenType::div) {
             prec = 1;
         }
         if (!prec.has_value() || prec < min_prec) {
@@ -103,6 +123,18 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
             mult->lhs = node_expression;
             mult->rhs = expr_rhs.value();
             node_binary_expression->var = mult;
+        } else if (op.type == TokenType::div) {
+            auto* div = m_allocator.allocate<NodeBinaryExpressionDivision>();
+            node_expression->var = expr_lhs->var;
+            div->lhs = node_expression;
+            div->rhs = expr_rhs.value();
+            node_binary_expression->var = div;
+        } else if (op.type == TokenType::sub) {
+            auto* sub = m_allocator.allocate<NodeBinaryExpressionSubtraction>();
+            node_expression->var = expr_lhs->var;
+            sub->lhs = node_expression;
+            sub->rhs = expr_rhs.value();
+            node_binary_expression->var = sub;
         }
 
         expr_lhs->var = node_binary_expression;
@@ -141,12 +173,12 @@ std::optional<NodeStatement*> Parser::parse_statement() {
         auto node_statement = m_allocator.allocate<NodeStatement>();
         node_statement->var = node_statement_exit;
         return node_statement;
-    } else if (peek().has_value() && peek().value().type == TokenType::let) {
+    } else if (peek().has_value() && peek().value().type == TokenType::uint32) {
         if (peek(1).has_value() && peek(1).value().type == TokenType::identifier) {
             if (peek(2).has_value() && peek(2).value().type == TokenType::equals) {
                 consume();
 
-                auto statement_let = m_allocator.allocate<NodeStatementLet>();
+                auto statement_let = m_allocator.allocate<NodeStatementUInt32>();
                 statement_let->Identifier = consume();
 
                 consume();

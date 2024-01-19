@@ -14,6 +14,10 @@ struct NodeTermIdentifier {
 
 struct NodeExpression;
 
+struct NodeTermParenthesis {
+    NodeExpression* expr;
+};
+
 struct NodeBinaryExpressionAdd {
     NodeExpression* lhs;
     NodeExpression* rhs;
@@ -24,12 +28,22 @@ struct NodeBinaryExpressionMultiplication {
     NodeExpression* rhs;
 };
 
+struct NodeBinaryExpressionSubtraction {
+    NodeExpression* lhs;
+    NodeExpression* rhs;
+};
+
+struct NodeBinaryExpressionDivision {
+    NodeExpression* lhs;
+    NodeExpression* rhs;
+};
+
 struct NodeBinaryExpression {
-    std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*> var;
+    std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*, NodeBinaryExpressionDivision*, NodeBinaryExpressionSubtraction*> var;
 };
 
 struct NodeTerm {
-    std::variant<NodeTermIntegerLiteral*, NodeTermIdentifier*> var;
+    std::variant<NodeTermIntegerLiteral*, NodeTermIdentifier*, NodeTermParenthesis*> var;
 };
 
 struct NodeExpression {
@@ -40,13 +54,13 @@ struct NodeStatementExit {
     NodeExpression* expr;
 };
 
-struct NodeStatementLet {
+struct NodeStatementUInt32 {
     Token Identifier;
     NodeExpression* expr{};
 };
 
 struct NodeStatement {
-    std::variant<NodeStatementExit*, NodeStatementLet*> var;
+    std::variant<NodeStatementExit*, NodeStatementUInt32*> var;
 };
 
 struct NodeProgram {

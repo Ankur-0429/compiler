@@ -11,10 +11,12 @@ enum class TokenType {
     open_parenthesis,
     closed_parenthesis,
     identifier,
-    let,
+    uint32,
     equals,
     plus,
     star,
+    sub,
+    div,
 };
 
 struct Token {

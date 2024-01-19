@@ -2,14 +2,14 @@
 #include "../include/tokenization.h"
 
 TEST(TokenizerTest, TokenizeSimpleExpression) {
-    std::string input = "let x = 42; exit(1);";
+    std::string input = "uint32 x = 42; exit(1);";
     Tokenizer tokenizer(input);
     std::vector<Token> tokens = tokenizer.tokenize();
 
     ASSERT_EQ(tokens.size(), 10);
 
-    EXPECT_EQ(tokens[0].type, TokenType::let);
-    EXPECT_EQ(tokens[0].value, "let");
+    EXPECT_EQ(tokens[0].type, TokenType::uint32);
+    EXPECT_EQ(tokens[0].value, "uint32");
 
     EXPECT_EQ(tokens[1].type, TokenType::identifier);
     EXPECT_EQ(tokens[1].value, "x");
