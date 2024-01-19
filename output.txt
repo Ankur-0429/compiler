@@ -1,4 +1,4 @@
-let x = 5;
-let y = x;
-let z = y;
-exit(z);
+cmake -S . -B cmake-build-debug
+cmake --build cmake-build-debug -j 12
+
+ctest --test-dir cmake-build-debug --output-on-failure

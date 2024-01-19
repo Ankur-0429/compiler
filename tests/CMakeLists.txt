@@ -1,5 +1,5 @@
 if(BUILD_TESTING)
-        add_executable(my_test ../src/tokenization.cpp tokenizationTest.cpp test2.cpp)
+        add_executable(my_test ../src/tokenization.cpp tokenizationTest.cpp)
         target_link_libraries(my_test PRIVATE GTest::gtest_main)
         include(GoogleTest)
         gtest_discover_tests(my_test)
