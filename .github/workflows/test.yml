@@ -15,6 +15,7 @@ jobs:
 
       - name: Set up CMake
         run: |
+          git submodule update --init --recursive
           cmake -S . -B cmake-build-debug
           cmake --build cmake-build-debug -j 12
 
