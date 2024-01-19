@@ -73,7 +73,6 @@ public:
     m_tokens(tokens),
     m_allocator(1024*1024*4){}
     std::optional<NodeExpression*> parse_expr(int min_prec = 0);
-    std::optional<NodeBinaryExpression*> parse_binary_expr();
     std::optional<NodeTerm*> parse_term();
     std::optional<NodeStatement*> parse_statement();
     std::optional<NodeProgram> parse_program();

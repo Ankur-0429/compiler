@@ -12,32 +12,6 @@ Token Parser::consume() {
     return m_tokens.at(m_current_index++);
 }
 
-std::optional<NodeBinaryExpression*> Parser::parse_binary_expr() {
-    if (auto lhs = parse_expr()) {
-        auto bin_expr = m_allocator.allocate<NodeBinaryExpression>();
-        if (peek().has_value() && peek().value().type == TokenType::plus) {
-            auto bin_expr_add = m_allocator.allocate<NodeBinaryExpressionAdd>();
-            bin_expr_add->lhs = lhs.value();
-            consume();
-
-            if (auto rhs = parse_expr()) {
-                bin_expr_add->rhs = rhs.value();
-                bin_expr->var = bin_expr_add;
-                return bin_expr;
-            } else {
-                std::cerr << "Expected rhs expression" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-        } else {
-            std::cerr << "Unsupported binary operator" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-    }
-
-    return {};
-}
-
 std::optional<NodeTerm*> Parser::parse_term() {
     if (peek().has_value() && peek().value().type == TokenType::integer_literal) {
         auto node_term_integer_literal = m_allocator.allocate<NodeTermIntegerLiteral>();
