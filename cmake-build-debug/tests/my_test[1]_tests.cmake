@@ -1,0 +1,5 @@
+add_test([=[TokenizerTest.TokenizeSimpleExpression]=]  /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/tests/my_test [==[--gtest_filter=TokenizerTest.TokenizeSimpleExpression]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[TokenizerTest.TokenizeSimpleExpression]=]  PROPERTIES WORKING_DIRECTORY /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[genericTest.gev]=]  /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/tests/my_test [==[--gtest_filter=genericTest.gev]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[genericTest.gev]=]  PROPERTIES WORKING_DIRECTORY /Users/ankurahir/CLionProjects/compiler/cmake-build-debug/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  my_test_TESTS TokenizerTest.TokenizeSimpleExpression genericTest.gev)

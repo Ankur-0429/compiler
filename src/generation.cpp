@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
-#include "generation.h"
+#include "../include/generation.h"
 
 llvm::Value* Generator::generate_term(const NodeTerm* term) {
     struct TermVisitor {

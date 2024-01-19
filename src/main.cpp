@@ -2,10 +2,10 @@
 #include <fstream>
 #include <sstream>
 #include <optional>
-#include "parser.h"
-#include "tokenization.h"
-#include "generation.h"
-#include "arenaAllocator.h"
+#include "../include/parser.h"
+#include "../include/tokenization.h"
+#include "../include/generation.h"
+#include "../include/arenaAllocator.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -37,12 +37,6 @@ int main(int argc, char* argv[]) {
     {
         std::fstream file("out.ll", std::ios::out);
         file << generator.generate_program();
-    }
-
-    std::string llc_command = "clang -O3 -o out out.ll";
-    if (std::system(llc_command.c_str()) != 0) {
-        std::cerr << "Error running clang\n";
-        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
