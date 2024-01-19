@@ -16,6 +16,7 @@ The one above works for macOS systems if you're installed it using homebrew. As 
 
 ### Build
 ```sh
+git submodule update --init --recursive
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug -j 12
 ```
