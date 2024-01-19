@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-//    std::remove("out.ll");
+    std::remove("out.ll");
 
     return EXIT_SUCCESS;
 }
