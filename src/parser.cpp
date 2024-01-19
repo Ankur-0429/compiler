@@ -62,7 +62,7 @@ std::optional<NodeExpression*> Parser::parse_expr() {
             auto bin_expr_add = m_allocator.allocate<NodeBinaryExpressionAdd>();
 
             auto lsh_expr = m_allocator.allocate<NodeExpression>();
-            lsh_expr->variant = term.value();
+            lsh_expr->var = term.value();
             bin_expr_add->lhs = lsh_expr;
 
             consume();
@@ -71,7 +71,7 @@ std::optional<NodeExpression*> Parser::parse_expr() {
                 bin_expr_add->rhs = rhs.value();
                 bin_expr->var = bin_expr_add;
                 auto expr = m_allocator.allocate<NodeExpression>();
-                expr->variant = bin_expr;
+                expr->var = bin_expr;
                 return expr;
             } else {
                 std::cerr << "Expected rhs expression" << std::endl;
@@ -80,7 +80,7 @@ std::optional<NodeExpression*> Parser::parse_expr() {
         }
 
         auto expr = m_allocator.allocate<NodeExpression>();
-        expr->variant = term.value();
+        expr->var = term.value();
         return expr;
     }
     return {};

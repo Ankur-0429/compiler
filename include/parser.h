@@ -33,7 +33,7 @@ struct NodeTerm {
 };
 
 struct NodeExpression {
-    std::variant<NodeTerm*, NodeBinaryExpression*> variant;
+    std::variant<NodeTerm*, NodeBinaryExpression*> var;
 };
 
 struct NodeStatementExit {

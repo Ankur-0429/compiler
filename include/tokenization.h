@@ -13,7 +13,8 @@ enum class TokenType {
     identifier,
     let,
     equals,
-    plus
+    plus,
+    star,
 };
 
 struct Token {

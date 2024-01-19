@@ -24,6 +24,30 @@ llvm::Value* Generator::generate_term(const NodeTerm* term) {
     return visitor.result;
 }
 
+llvm::Value* Generator::generate_binary_expression(const NodeBinaryExpression* binary_expression) {
+    struct BinaryExpressionVisitor {
+        Generator& generator;
+        llvm::Value* result{};
+        explicit BinaryExpressionVisitor(const Generator& gen) : generator(const_cast<Generator &>(gen)) {}
+
+        void operator()(const NodeBinaryExpressionAdd* add_expr) {
+            llvm::Value* lhsValue = generator.generate_expression(add_expr->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(add_expr->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateAdd(lhsValue, rhsValue);
+            result = resultValue;
+        }
+
+        void operator()(const NodeBinaryExpressionMultiplication* mult) {
+            return;
+        }
+    };
+
+    BinaryExpressionVisitor visitor(*this);
+    std::visit(visitor, binary_expression->var);
+    return visitor.result;
+}
+
 llvm::Value* Generator::generate_expression(NodeExpression* expression) {
     struct ExpressionVisitor {
         Generator& generator;
@@ -35,23 +59,12 @@ llvm::Value* Generator::generate_expression(NodeExpression* expression) {
         }
 
         void operator()(const NodeBinaryExpression* binary_expr) {
-            if (std::holds_alternative<NodeBinaryExpressionAdd*>(binary_expr->var)) {
-                NodeBinaryExpressionAdd* add_expr = std::get<NodeBinaryExpressionAdd*>(binary_expr->var);
-
-                llvm::Value* lhsValue = generator.generate_expression(add_expr->lhs);
-                llvm::Value* rhsValue = generator.generate_expression(add_expr->rhs);
-
-                llvm::Value* resultValue = generator.m_builder.CreateAdd(lhsValue, rhsValue);
-                result = resultValue;
-            } else {
-                std::cerr << "operation not allowed" << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            result = generator.generate_binary_expression(binary_expr);
         }
     };
 
     ExpressionVisitor visitor(*this);
-    std::visit(visitor, expression->variant);
+    std::visit(visitor, expression->var);
     return visitor.result;
 }
 
@@ -73,9 +86,7 @@ void Generator::generate_statement(const NodeStatement* statement) {
                 exit(EXIT_FAILURE);
             }
 
-//            llvm::AllocaInst* allocaInst = generator.m_builder.CreateAlloca(generator.m_builder.getInt32Ty(), nullptr, statement_let->Identifier.value.value());
             llvm::Value* letValue = generator.generate_expression(statement_let->expr);
-//            generator.m_builder.CreateStore(letValue, allocaInst);
             generator.m_vars.insert({statement_let->Identifier.value.value(), letValue});
         }
     };

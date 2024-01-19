@@ -32,31 +32,27 @@ std::vector<Token> Tokenizer::tokenize() {
             }
             tokens.push_back({.type = TokenType::integer_literal, .value = buf});
             buf.clear();
-            continue;
         } else if (peek().value() == '(') {
             consume();
             tokens.push_back({.type = TokenType::open_parenthesis});
-            continue;
         } else if (peek().value() == ')') {
             consume();
             tokens.push_back({.type = TokenType::closed_parenthesis});
-            continue;
         } else if (peek().value() == ';') {
             consume();
             tokens.push_back({.type = TokenType::semi_colon});
-            continue;
         } else if (peek().value() == '=') {
             consume();
             tokens.push_back({.type = TokenType::equals});
-            continue;
         } else if (peek().value() == '+') {
             consume();
             tokens.push_back({.type = TokenType::plus});
-            continue;
         } else if (std::isspace(peek().value())) {
             consume();
-            continue;
-        } else {
+        } else if (peek().value() == '*') {
+            consume();
+            tokens.push_back({.type = TokenType::star});
+        }  else {
             std::cerr << "tokenization failed" << std::endl;
             exit(EXIT_FAILURE);
         }

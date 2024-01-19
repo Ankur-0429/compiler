@@ -15,6 +15,7 @@ public:
     llvm::Value* generate_term(const NodeTerm* term);
     void generate_statement(const NodeStatement* statement);
     llvm::Value* generate_expression(NodeExpression* expression);
+    llvm::Value* generate_binary_expression(const NodeBinaryExpression* binary_expression);
 private:
     const NodeProgram m_program;
     llvm::LLVMContext m_context;
