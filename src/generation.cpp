@@ -130,8 +130,7 @@ void Generator::generate_statement(const NodeStatement* statement) {
 
         void operator()(const NodeStatementExit* statement_exit) {
             llvm::Value* exitValue = generator.generate_expression(statement_exit->expr);
-            generator.m_builder.CreateStore(exitValue, generator.m_builder.CreateAlloca(exitValue->getType()));
-            llvm::FunctionType* exitFuncType = llvm::FunctionType::get(generator.m_builder.getInt32Ty(), false);
+            llvm::FunctionType* exitFuncType = llvm::FunctionType::get(generator.m_builder.getInt32Ty(), {generator.m_builder.getInt32Ty()}, false);
             llvm::FunctionCallee exitFunc = generator.m_module.getOrInsertFunction("exit", exitFuncType);
             generator.m_builder.CreateCall(exitFunc, {exitValue});
         }
