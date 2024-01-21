@@ -59,8 +59,14 @@ struct NodeStatementUInt32 {
     NodeExpression* expr{};
 };
 
+struct NodeStatement;
+
+struct NodeStatementScope {
+    std::vector<NodeStatement*> statements;
+};
+
 struct NodeStatement {
-    std::variant<NodeStatementExit*, NodeStatementUInt32*> var;
+    std::variant<NodeStatementExit*, NodeStatementUInt32*, NodeStatementScope*> var;
 };
 
 struct NodeProgram {

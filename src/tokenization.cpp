@@ -55,6 +55,12 @@ std::vector<Token> Tokenizer::tokenize() {
         } else if (peek().value() == '/') {
             consume();
             tokens.push_back({.type = TokenType::div});
+        } else if (peek().value() == '{') {
+            consume();
+            tokens.push_back({.type = TokenType::open_curly});
+        } else if (peek().value() == '}') {
+            consume();
+            tokens.push_back({.type = TokenType::closed_curly});
         } else {
             std::cerr << "tokenization failed" << std::endl;
             exit(EXIT_FAILURE);

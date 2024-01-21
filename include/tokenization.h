@@ -17,6 +17,8 @@ enum class TokenType {
     star,
     sub,
     div,
+    open_curly,
+    closed_curly,
 };
 
 struct Token {

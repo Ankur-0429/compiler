@@ -176,6 +176,28 @@ std::optional<NodeStatement*> Parser::parse_statement() {
                 return node_statement;
             }
         }
+    } else if (peek().has_value() && peek().value().type == TokenType::open_curly) {
+        consume();
+
+        auto scope = m_allocator.allocate<NodeStatementScope>();
+
+        while (auto statment = parse_statement()) {
+            if (!statment.has_value()) {
+                std::cerr << "unable to parse statements within curly" << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            scope->statements.push_back(statment.value());
+        }
+
+        if (!peek().has_value() || peek().value().type != TokenType::closed_curly) {
+            std::cerr << "expected }" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        consume();
+
+        auto statement = m_allocator.allocate<NodeStatement>();
+        statement->var = scope;
+        return statement;
     }
     return {};
 }

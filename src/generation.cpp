@@ -3,6 +3,30 @@
 #include <cassert>
 #include "../include/generation.h"
 
+void Generator::push_scope() {
+    llvm::BasicBlock* scopeBlock = llvm::BasicBlock::Create(m_context, "scope" + std::to_string(m_scopeStack.size()), m_builder.GetInsertBlock()->getParent());
+    m_scopeStack.push_back(scopeBlock);
+    m_builder.CreateBr(scopeBlock);
+    m_builder.SetInsertPoint(scopeBlock);
+}
+
+void Generator::pop_scope() {
+    if (!m_scopeStack.empty()) {
+        llvm::BasicBlock* currentScope = m_scopeStack.back();
+        m_scopeStack.pop_back();
+
+        // Append the size of m_scopeStack to create a unique continuation name
+        std::string continuationName = "continuation" + std::to_string(m_scopeStack.size());
+        llvm::BasicBlock* continuationBlock = llvm::BasicBlock::Create(m_context, continuationName, currentScope->getParent());
+
+        m_builder.CreateBr(continuationBlock);
+        m_builder.SetInsertPoint(continuationBlock);
+    } else {
+        std::cerr << "Error: Attempted to pop an empty scope stack." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
 llvm::Value* Generator::generate_term(const NodeTerm* term) {
     struct TermVisitor {
         Generator& generator;
@@ -12,11 +36,19 @@ llvm::Value* Generator::generate_term(const NodeTerm* term) {
             result = generator.m_builder.getInt32(std::stoi(integer_literal->integer_literal.value.value()));
         }
         void operator()(const NodeTermIdentifier* identifier) const {
-            if (generator.m_vars.find(identifier->identifier.value.value()) == generator.m_vars.end()) {
-                std::cerr << "Undeclared Identifier: " << identifier->identifier.value.value() << std::endl;
-                exit(EXIT_FAILURE);
+            for (llvm::BasicBlock* scopeBlock : generator.m_scopeStack) {
+                auto it = std::find_if(generator.m_vars.cbegin(), generator.m_vars.cend(), [&](const Var& var) {
+                    return (var.block == scopeBlock) && (var.name == identifier->identifier.value.value());
+                });
+
+                if (it != generator.m_vars.cend()) {
+                    result = it->value;
+                    return;
+                }
             }
-            result = generator.m_vars.at(identifier->identifier.value.value());
+
+            std::cerr << "Undeclared Identifier: " << identifier->identifier.value.value() << std::endl;
+            exit(EXIT_FAILURE);
         }
         void operator()(const NodeTermParenthesis* parenthesis) const {
             result = generator.generate_expression(parenthesis->expr);
@@ -104,7 +136,10 @@ void Generator::generate_statement(const NodeStatement* statement) {
             generator.m_builder.CreateCall(exitFunc, {exitValue});
         }
         void operator()(const NodeStatementUInt32* statement_uint32) {
-            if (generator.m_vars.find(statement_uint32->Identifier.value.value()) != generator.m_vars.end()) {
+            auto it = std::find_if(generator.m_vars.cbegin(), generator.m_vars.cend(), [&](const Var& var) {
+                return var.name == statement_uint32->Identifier.value.value();
+            });
+            if (it != generator.m_vars.cend()) {
                 std::cerr << "Identifier already used: " << statement_uint32->Identifier.value.value() << "\n";
                 exit(EXIT_FAILURE);
             }
@@ -116,7 +151,14 @@ void Generator::generate_statement(const NodeStatement* statement) {
                 exit(EXIT_FAILURE);
             }
 
-            generator.m_vars.insert({statement_uint32->Identifier.value.value(), letValue});
+            generator.m_vars.push_back({statement_uint32->Identifier.value.value(), letValue, generator.m_builder.GetInsertBlock()});
+        }
+        void operator()(const NodeStatementScope* statement_scope) {
+            generator.push_scope();
+            for (const NodeStatement *statement : statement_scope->statements) {
+                generator.generate_statement(statement);
+            }
+            generator.pop_scope();
         }
     };
 
@@ -128,6 +170,7 @@ std::string Generator::generate_program() {
     llvm::FunctionType* mainFuncType = llvm::FunctionType::get(m_builder.getInt32Ty(), false);
     llvm::Function* mainFunc = llvm::Function::Create(mainFuncType, llvm::Function::ExternalLinkage, "main", &m_module);
     llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(m_context, "entry", mainFunc);
+    m_scopeStack.push_back(entryBlock);
     m_builder.SetInsertPoint(entryBlock);
 
     for (const NodeStatement* statement : m_program.statement) {
