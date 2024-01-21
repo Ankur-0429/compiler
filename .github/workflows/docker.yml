@@ -1,29 +1,16 @@
-name: Docker Build Check
+name: docker-build-workflow
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-container:
     runs-on: ubuntu-latest
-
-    services:
-      - docker://docker:dind
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Build Docker Image
-        run: docker build -t my_project .
-
-      - name: Display Docker Images
-        run: docker images
-
-      - name: Run Docker Container (Optional)
-        run: docker run my_project
-
-      - name: Clean Up Docker Resources (Optional)
-        run: docker rmi my_project
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag hydrogen-ubuntu:$(date +%s)
