@@ -16,10 +16,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set up CMake
+      - name: Set up CMake and Build (Linux and Windows)
         run: |
           git submodule update --init --recursive
           cmake -S . -B cmake-build-debug
+          cmake --build cmake-build-debug -j 12
+
+      - name: Set up CMake and Build (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Install LLVM using Homebrew
+          brew install llvm
+          
+          # Set CMake directory for LLVM on macOS
+          LLVM_CMAKE_DIR=$(brew --prefix llvm)/lib/cmake/llvm
+          git submodule update --init --recursive
+          cmake -S . -B cmake-build-debug -DLLVM_DIR=${LLVM_CMAKE_DIR}
           cmake --build cmake-build-debug -j 12
 
       - name: Run Tests
