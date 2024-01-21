@@ -27,7 +27,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install llvm
-          LLVM_CMAKE_DIR=$(brew --prefix llvm)/lib/cmake/llvm
+          LLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm
           git submodule update --init --recursive
           cmake -S . -B cmake-build-debug -DLLVM_DIR=${LLVM_CMAKE_DIR}
           cmake --build cmake-build-debug -j 12
