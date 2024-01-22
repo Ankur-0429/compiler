@@ -29,6 +29,7 @@ jobs:
               expected_exit_code_file="tests/scopeTest/output/${input_file%}.txt"
           
               ./cmake-build-debug/hydro $file output_binary
+              ./output_binary
               exit_code=$?
           
               expected_exit_code=$(cat $expected_exit_code_file)
