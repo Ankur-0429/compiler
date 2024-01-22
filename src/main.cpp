@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
         file << generator.generate_program();
     }
 
-    std::string llc_command = "clang -O3 -o " + outputFileName + " " + "out.ll";
+    std::string llc_command = "clang -Wno-override-module -O3 -o " + outputFileName + " " + "out.ll";
     if (std::system(llc_command.c_str()) != 0) {
         std::cerr << "Error running clang\n";
         return EXIT_FAILURE;

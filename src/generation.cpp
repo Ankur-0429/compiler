@@ -172,8 +172,6 @@ std::string Generator::generate_program() {
     m_scopeStack.push_back(entryBlock);
     m_builder.SetInsertPoint(entryBlock);
 
-    m_module.setTargetTriple("arm64-apple-macosx14.0.0");
-
     for (const NodeStatement* statement : m_program.statement) {
         generate_statement(statement);
     }
