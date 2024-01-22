@@ -1,6 +1,4 @@
-uint32 x = 5;
 {
-    uint32 y = 10;
+    uint32 y = 5;
+    exit(y);
 }
-
-exit(x);

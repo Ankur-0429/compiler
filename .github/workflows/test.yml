@@ -21,3 +21,22 @@ jobs:
 
       - name: Run Tests
         run: ctest --test-dir cmake-build-debug --output-on-failure
+
+      - name: Run Compiler Exit Code Tests
+        run: |
+          for file in tests/scopeTest/input/*.hydro; do
+              input_file=$(basename $file)
+              expected_exit_code_file="tests/scopeTest/output/${input_file%}.txt"
+          
+              ./cmake-build-debug/hydro $file output_binary
+              exit_code=$?
+          
+              expected_exit_code=$(cat $expected_exit_code_file)
+          
+              if [ $exit_code -eq $expected_exit_code ]; then
+                  echo "Test for $input_file Passed"
+              else
+                  echo "Test for $input_file Failed: Expected Exit Code $expected_exit_code, Actual Exit Code $exit_code"
+                  exit 1
+              fi
+          done
