@@ -1,16 +1,13 @@
-uint32 x = 7;
+uint32 x = 6;
 {
     uint32 y = 8;
 
     {
-        uint32 y = 9;
+        uint32 z = 9;
 
         {
-            uint32 y = 10;
-
-
+            uint32 d = 10;
         }
-
     }
 }
 
