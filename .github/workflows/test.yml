@@ -23,13 +23,13 @@ jobs:
         run: ctest --test-dir cmake-build-debug --output-on-failure
 
       - name: Run Compiler Exit Code Tests
-        continue-on-error: true
         run: |
           for file in tests/scopeTest/input/*.hy; do
               input_file=$(basename $file)
               expected_exit_code_file="tests/scopeTest/output/${input_file%}.txt"
           
               ./cmake-build-debug/hydro $file output_binary
+              set +e
               ./output_binary
               exit_code=$?
           
