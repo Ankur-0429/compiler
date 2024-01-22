@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Compiler Exit Code Tests
         run: |
-          for file in tests/scopeTest/input/*.hydro; do
+          for file in tests/scopeTest/input/*.hy; do
               input_file=$(basename $file)
               expected_exit_code_file="tests/scopeTest/output/${input_file%}.txt"
           
