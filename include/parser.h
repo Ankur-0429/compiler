@@ -38,8 +38,18 @@ struct NodeBinaryExpressionDivision {
     NodeExpression* rhs;
 };
 
+struct NodeBinaryExpressionGreaterThan {
+    NodeExpression* lhs;
+    NodeExpression* rhs;
+};
+
+struct NodeBinaryExpressionGreaterThanOrEqualTo {
+    NodeExpression* lhs;
+    NodeExpression* rhs;
+};
+
 struct NodeBinaryExpression {
-    std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*, NodeBinaryExpressionDivision*, NodeBinaryExpressionSubtraction*> var;
+    std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*, NodeBinaryExpressionDivision*, NodeBinaryExpressionSubtraction*, NodeBinaryExpressionGreaterThan*, NodeBinaryExpressionGreaterThanOrEqualTo*> var;
 };
 
 struct NodeTerm {
@@ -61,12 +71,17 @@ struct NodeStatementUInt32 {
 
 struct NodeStatement;
 
-struct NodeStatementScope {
+struct NodeScope {
     std::vector<NodeStatement*> statements;
 };
 
+struct NodeStatementIf {
+    NodeExpression* expr{};
+    NodeScope* scope{};
+};
+
 struct NodeStatement {
-    std::variant<NodeStatementExit*, NodeStatementUInt32*, NodeStatementScope*> var;
+    std::variant<NodeStatementExit*, NodeStatementUInt32*, NodeScope*, NodeStatementIf*> var;
 };
 
 struct NodeProgram {
@@ -82,6 +97,7 @@ public:
     std::optional<NodeTerm*> parse_term();
     std::optional<NodeStatement*> parse_statement();
     std::optional<NodeProgram> parse_program();
+    std::optional<NodeScope*> parse_scope();
 private:
     const std::vector<Token> m_tokens;
     size_t m_current_index{};

@@ -18,6 +18,9 @@ std::vector<Token> Tokenizer::tokenize() {
             } else if (buf == "uint32") {
                 tokens.push_back({.type = TokenType::uint32, .value = buf});
                 buf.clear();
+            } else if (buf == "if") {
+                tokens.push_back({.type = TokenType::if_});
+                buf.clear();
             } else {
                 tokens.push_back({.type = TokenType::identifier, .value = buf});
                 buf.clear();
@@ -61,6 +64,13 @@ std::vector<Token> Tokenizer::tokenize() {
         } else if (peek().value() == '}') {
             consume();
             tokens.push_back({.type = TokenType::closed_curly});
+        } else if (peek().value() == '>' && peek(1).value() == '=') {
+            consume();
+            consume();
+            tokens.push_back({.type = TokenType::greater_than_or_equal_to});
+        } else if (peek().value() == '>') {
+            consume();
+            tokens.push_back({.type = TokenType::greater_than});
         } else {
             std::cerr << "tokenization failed" << std::endl;
             exit(EXIT_FAILURE);

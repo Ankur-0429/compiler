@@ -15,7 +15,6 @@ void Generator::pop_scope() {
         llvm::BasicBlock* currentScope = m_scopeStack.back();
         m_scopeStack.pop_back();
 
-        // Append the size of m_scopeStack to create a unique continuation name
         std::string continuationName = "continuation" + std::to_string(m_scopeStack.size());
         llvm::BasicBlock* continuationBlock = llvm::BasicBlock::Create(m_context, continuationName, currentScope->getParent());
 
@@ -96,6 +95,22 @@ llvm::Value* Generator::generate_binary_expression(const NodeBinaryExpression* b
             llvm::Value* resultValue = generator.m_builder.CreateSDiv(lhsValue, rhsValue);
             result = resultValue;
         }
+
+        void operator()(const NodeBinaryExpressionGreaterThan* greater_than) {
+            llvm::Value* lhsValue = generator.generate_expression(greater_than->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(greater_than->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateICmpSGT(lhsValue, rhsValue);
+            result = resultValue;
+        }
+
+        void operator()(const NodeBinaryExpressionGreaterThanOrEqualTo* greater_than_or_equal_to) {
+            llvm::Value* lhsValue = generator.generate_expression(greater_than_or_equal_to->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(greater_than_or_equal_to->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateICmpSGE(lhsValue, rhsValue);
+            result = resultValue;
+        }
     };
 
     BinaryExpressionVisitor visitor(*this);
@@ -152,12 +167,35 @@ void Generator::generate_statement(const NodeStatement* statement) {
 
             generator.m_vars.push_back({statement_uint32->Identifier.value.value(), letValue, generator.m_builder.GetInsertBlock()});
         }
-        void operator()(const NodeStatementScope* statement_scope) {
+        void operator()(const NodeScope* statement_scope) {
             generator.push_scope();
             for (const NodeStatement *statement : statement_scope->statements) {
                 generator.generate_statement(statement);
             }
             generator.pop_scope();
+        }
+        void operator()(const NodeStatementIf* statementIf) {
+            llvm::Function* currentFunction = generator.m_builder.GetInsertBlock()->getParent();
+            llvm::BasicBlock* ifBlock = llvm::BasicBlock::Create(generator.m_context, "ifblock", currentFunction);
+            llvm::BasicBlock* endBlock = llvm::BasicBlock::Create(generator.m_context, "endblock", currentFunction);
+
+            llvm::Value* conditionValue = generator.generate_expression(statementIf->expr);
+
+            if (!conditionValue->getType()->isIntegerTy(1)) {
+                std::cerr << "Error: Condition must evaluate to a boolean value." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+
+            generator.m_builder.CreateCondBr(conditionValue, ifBlock, endBlock);
+
+            generator.m_builder.SetInsertPoint(ifBlock);
+
+            for (auto statement : statementIf->scope->statements) {
+                generator.generate_statement(statement);
+            }
+
+            generator.m_builder.CreateBr(endBlock);
+            generator.m_builder.SetInsertPoint(endBlock);
         }
     };
 

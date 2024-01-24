@@ -12,6 +12,25 @@ Token Parser::consume() {
     return m_tokens.at(m_current_index++);
 }
 
+std::optional<NodeScope*> Parser::parse_scope() {
+    if (peek().has_value() && peek().value().type != TokenType::open_curly) {
+        return {};
+    }
+    consume();
+
+    auto scope = m_allocator.allocate<NodeScope>();
+    while (auto statement = parse_statement()) {
+        scope->statements.push_back(statement.value());
+    }
+
+    if (peek().has_value() && peek().value().type != TokenType::closed_curly) {
+        return {};
+    }
+    consume();
+
+    return scope;
+}
+
 std::optional<NodeTerm*> Parser::parse_term() {
     if (peek().has_value() && peek().value().type == TokenType::integer_literal) {
         auto node_term_integer_literal = m_allocator.allocate<NodeTermIntegerLiteral>();
@@ -64,10 +83,12 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
             break;
         }
 
-        if (current_token->type == TokenType::plus || current_token->type == TokenType::sub) {
+        if (current_token->type == TokenType::greater_than || current_token->type == TokenType::greater_than_or_equal_to) {
             prec = 0;
-        } else if (current_token->type == TokenType::star || current_token->type == TokenType::div) {
+        } else if (current_token->type == TokenType::plus || current_token->type == TokenType::sub) {
             prec = 1;
+        } else if (current_token->type == TokenType::star || current_token->type == TokenType::div) {
+            prec = 2;
         }
         if (!prec.has_value() || prec < min_prec) {
             break;
@@ -109,6 +130,18 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
             sub->lhs = node_expression;
             sub->rhs = expr_rhs.value();
             node_binary_expression->var = sub;
+        } else if (op.type == TokenType::greater_than) {
+            auto* greaterThan = m_allocator.allocate<NodeBinaryExpressionGreaterThan>();
+            node_expression->var = expr_lhs->var;
+            greaterThan->lhs = node_expression;
+            greaterThan->rhs = expr_rhs.value();
+            node_binary_expression->var = greaterThan;
+        } else if (op.type == TokenType::greater_than_or_equal_to) {
+            auto* greaterThanOrEqualTo = m_allocator.allocate<NodeBinaryExpressionGreaterThanOrEqualTo>();
+            node_expression->var = expr_lhs->var;
+            greaterThanOrEqualTo->lhs = node_expression;
+            greaterThanOrEqualTo->rhs = expr_rhs.value();
+            node_binary_expression->var = greaterThanOrEqualTo;
         }
 
         expr_lhs->var = node_binary_expression;
@@ -177,26 +210,47 @@ std::optional<NodeStatement*> Parser::parse_statement() {
             }
         }
     } else if (peek().has_value() && peek().value().type == TokenType::open_curly) {
+        if (auto scope = parse_scope()) {
+            auto statement = m_allocator.allocate<NodeStatement>();
+            statement->var = scope.value();
+            return statement;
+        } else {
+            std::cerr << "Invalid expression" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    } else if (peek().has_value() && peek().value().type == TokenType::if_) {
         consume();
 
-        auto scope = m_allocator.allocate<NodeStatementScope>();
-
-        while (auto statment = parse_statement()) {
-            if (!statment.has_value()) {
-                std::cerr << "unable to parse statements within curly" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-            scope->statements.push_back(statment.value());
-        }
-
-        if (!peek().has_value() || peek().value().type != TokenType::closed_curly) {
-            std::cerr << "expected }" << std::endl;
+        if (peek().has_value() && peek().value().type != TokenType::open_parenthesis) {
+            std::cerr << "Expected (" << std::endl;
             exit(EXIT_FAILURE);
         }
         consume();
 
+        auto statementIf = m_allocator.allocate<NodeStatementIf>();
+
+        if (auto expr = parse_expr()) {
+            statementIf->expr = expr.value();
+        } else {
+            std::cerr << "Invalid expression" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        if (peek().has_value() && peek().value().type != TokenType::closed_parenthesis) {
+            std::cerr << "Expected )" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        consume();
+
+        if (auto scope = parse_scope()) {
+            statementIf->scope = scope.value();
+        } else {
+            std::cerr << "Invalid scope" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
         auto statement = m_allocator.allocate<NodeStatement>();
-        statement->var = scope;
+        statement->var = statementIf;
         return statement;
     }
     return {};

@@ -19,6 +19,9 @@ enum class TokenType {
     div,
     open_curly,
     closed_curly,
+    if_,
+    greater_than,
+    greater_than_or_equal_to,
 };
 
 struct Token {
