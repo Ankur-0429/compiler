@@ -83,13 +83,25 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
             break;
         }
 
-        if (current_token->type == TokenType::greater_than || current_token->type == TokenType::greater_than_or_equal_to) {
-            prec = 0;
-        } else if (current_token->type == TokenType::plus || current_token->type == TokenType::sub) {
-            prec = 1;
-        } else if (current_token->type == TokenType::star || current_token->type == TokenType::div) {
-            prec = 2;
+        switch (current_token->type) {
+            case TokenType::greater_than:
+            case TokenType::greater_than_or_equal_to:
+            case TokenType::less_than:
+            case TokenType::less_than_or_equal_to:
+                prec = 0;
+                break;
+            case TokenType::plus:
+            case TokenType::sub:
+                prec = 1;
+                break;
+            case TokenType::star:
+            case TokenType::div:
+                prec = 2;
+                break;
+            default:
+                break;
         }
+
         if (!prec.has_value() || prec < min_prec) {
             break;
         }
@@ -106,42 +118,41 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
         auto* node_binary_expression = m_allocator.allocate<NodeBinaryExpression>();
         auto* node_expression = m_allocator.allocate<NodeExpression>();
 
-        if (op.type == TokenType::plus) {
-            auto* add = m_allocator.allocate<NodeBinaryExpressionAdd>();
+        auto createBinaryNode = [&](auto* binaryNode) {
             node_expression->var = expr_lhs->var;
-            add->lhs = node_expression;
-            add->rhs = expr_rhs.value();
-            node_binary_expression->var = add;
-        } else if (op.type == TokenType::star) {
-            auto* mult = m_allocator.allocate<NodeBinaryExpressionMultiplication>();
-            node_expression->var = expr_lhs->var;
-            mult->lhs = node_expression;
-            mult->rhs = expr_rhs.value();
-            node_binary_expression->var = mult;
-        } else if (op.type == TokenType::div) {
-            auto* div = m_allocator.allocate<NodeBinaryExpressionDivision>();
-            node_expression->var = expr_lhs->var;
-            div->lhs = node_expression;
-            div->rhs = expr_rhs.value();
-            node_binary_expression->var = div;
-        } else if (op.type == TokenType::sub) {
-            auto* sub = m_allocator.allocate<NodeBinaryExpressionSubtraction>();
-            node_expression->var = expr_lhs->var;
-            sub->lhs = node_expression;
-            sub->rhs = expr_rhs.value();
-            node_binary_expression->var = sub;
-        } else if (op.type == TokenType::greater_than) {
-            auto* greaterThan = m_allocator.allocate<NodeBinaryExpressionGreaterThan>();
-            node_expression->var = expr_lhs->var;
-            greaterThan->lhs = node_expression;
-            greaterThan->rhs = expr_rhs.value();
-            node_binary_expression->var = greaterThan;
-        } else if (op.type == TokenType::greater_than_or_equal_to) {
-            auto* greaterThanOrEqualTo = m_allocator.allocate<NodeBinaryExpressionGreaterThanOrEqualTo>();
-            node_expression->var = expr_lhs->var;
-            greaterThanOrEqualTo->lhs = node_expression;
-            greaterThanOrEqualTo->rhs = expr_rhs.value();
-            node_binary_expression->var = greaterThanOrEqualTo;
+            binaryNode->lhs = node_expression;
+            binaryNode->rhs = expr_rhs.value();
+            node_binary_expression->var = binaryNode;
+        };
+
+        switch (op.type) {
+            case TokenType::plus:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionAdd>());
+                break;
+            case TokenType::star:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionMultiplication>());
+                break;
+            case TokenType::div:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionDivision>());
+                break;
+            case TokenType::sub:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionSubtraction>());
+                break;
+            case TokenType::greater_than:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionGreaterThan>());
+                break;
+            case TokenType::greater_than_or_equal_to:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionGreaterThanOrEqualTo>());
+                break;
+            case TokenType::less_than:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionLessThan>());
+                break;
+            case TokenType::less_than_or_equal_to:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionLessThanOrEqualTo>());
+                break;
+            default:
+                std::cerr << "Binary expression parsing failed" << std::endl;
+                exit(EXIT_FAILURE);
         }
 
         expr_lhs->var = node_binary_expression;

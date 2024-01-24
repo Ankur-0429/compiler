@@ -43,13 +43,23 @@ struct NodeBinaryExpressionGreaterThan {
     NodeExpression* rhs;
 };
 
+struct NodeBinaryExpressionLessThan {
+    NodeExpression* lhs;
+    NodeExpression* rhs;
+};
+
 struct NodeBinaryExpressionGreaterThanOrEqualTo {
     NodeExpression* lhs;
     NodeExpression* rhs;
 };
 
+struct NodeBinaryExpressionLessThanOrEqualTo {
+    NodeExpression* lhs;
+    NodeExpression* rhs;
+};
+
 struct NodeBinaryExpression {
-    std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*, NodeBinaryExpressionDivision*, NodeBinaryExpressionSubtraction*, NodeBinaryExpressionGreaterThan*, NodeBinaryExpressionGreaterThanOrEqualTo*> var;
+    std::variant<NodeBinaryExpressionAdd*, NodeBinaryExpressionMultiplication*, NodeBinaryExpressionDivision*, NodeBinaryExpressionSubtraction*, NodeBinaryExpressionGreaterThan*, NodeBinaryExpressionGreaterThanOrEqualTo*, NodeBinaryExpressionLessThan*, NodeBinaryExpressionLessThanOrEqualTo*> var;
 };
 
 struct NodeTerm {

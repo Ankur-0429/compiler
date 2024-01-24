@@ -69,6 +69,13 @@ std::optional<Token> Tokenizer::tokenizeChar() {
                 return Token{.type = TokenType::greater_than_or_equal_to};
             }
             return consumeAndAdd(TokenType::greater_than);
+        case '<':
+            if (peek(1).has_value() && peek(1).value() == '=') {
+                consume();
+                consume();
+                return Token{.type = TokenType::less_than_or_equal_to};
+            }
+            return consumeAndAdd(TokenType::less_than);
         case ' ':
         case '\t':
         case '\n':

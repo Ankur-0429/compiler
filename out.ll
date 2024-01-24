@@ -3,7 +3,7 @@ source_filename = "MyModule"
 
 define i32 @main() {
 entry:
-  br i1 true, label %ifblock, label %endblock
+  br i1 false, label %ifblock, label %endblock
 
 ifblock:                                          ; preds = %entry
   %0 = call i32 @exit(i32 2)

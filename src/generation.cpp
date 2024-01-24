@@ -111,6 +111,22 @@ llvm::Value* Generator::generate_binary_expression(const NodeBinaryExpression* b
             llvm::Value* resultValue = generator.m_builder.CreateICmpSGE(lhsValue, rhsValue);
             result = resultValue;
         }
+
+        void operator()(const NodeBinaryExpressionLessThan* less_than) {
+            llvm::Value* lhsValue = generator.generate_expression(less_than->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(less_than->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateICmpSLT(lhsValue, rhsValue);
+            result = resultValue;
+        }
+
+        void operator()(const NodeBinaryExpressionLessThanOrEqualTo* less_than_or_equal_to) {
+            llvm::Value* lhsValue = generator.generate_expression(less_than_or_equal_to->lhs);
+            llvm::Value* rhsValue = generator.generate_expression(less_than_or_equal_to->rhs);
+
+            llvm::Value* resultValue = generator.m_builder.CreateICmpSLE(lhsValue, rhsValue);
+            result = resultValue;
+        }
     };
 
     BinaryExpressionVisitor visitor(*this);
