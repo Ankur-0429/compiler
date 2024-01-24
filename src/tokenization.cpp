@@ -69,6 +69,30 @@ std::optional<Token> Tokenizer::tokenizeChar() {
         case '*':
             return consumeAndAdd(TokenType::star);
         case '/':
+            if (peek(1).has_value() && peek(1).value() == '/') {
+                consume();
+                consume();
+                while (peek().has_value() && peek().value() != '\n') {
+                    consume();
+                }
+                return {};
+            }
+
+            if (peek(1).has_value() && peek(1).value() == '*') {
+                consume();
+                consume();
+                while (peek().has_value() && peek().value() != '*' && peek(1).has_value() && peek(1).value() != '/') {
+                    consume();
+                }
+                if (peek().has_value() && peek(1).has_value()) {
+                    consume();
+                    consume();
+                    return {};
+                } else {
+                    std::cerr << "multi line comment should end" << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+            }
             return consumeAndAdd(TokenType::div);
         case '{':
             return consumeAndAdd(TokenType::open_curly);
