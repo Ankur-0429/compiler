@@ -88,6 +88,8 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
             case TokenType::greater_than_or_equal_to:
             case TokenType::less_than:
             case TokenType::less_than_or_equal_to:
+            case TokenType::equals_condition:
+            case TokenType::not_equals_condition:
                 prec = 0;
                 break;
             case TokenType::plus:
@@ -149,6 +151,12 @@ std::optional<NodeExpression*> Parser::parse_expr(int min_prec) {
                 break;
             case TokenType::less_than_or_equal_to:
                 createBinaryNode(m_allocator.allocate<NodeBinaryExpressionLessThanOrEqualTo>());
+                break;
+            case TokenType::equals_condition:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionEquals>());
+                break;
+            case TokenType::not_equals_condition:
+                createBinaryNode(m_allocator.allocate<NodeBinaryExpressionNotEquals>());
                 break;
             default:
                 std::cerr << "Binary expression parsing failed" << std::endl;

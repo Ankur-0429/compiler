@@ -24,6 +24,8 @@ enum class TokenType {
     greater_than_or_equal_to,
     less_than,
     less_than_or_equal_to,
+    equals_condition,
+    not_equals_condition,
 };
 
 struct Token {

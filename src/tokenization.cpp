@@ -49,7 +49,19 @@ std::optional<Token> Tokenizer::tokenizeChar() {
         case ';':
             return consumeAndAdd(TokenType::semi_colon);
         case '=':
+            if (peek(1).has_value() && peek(1).value() == '=') {
+                consume();
+                consume();
+                return Token{.type = TokenType::equals_condition};
+            }
             return consumeAndAdd(TokenType::equals);
+        case '!':
+            if (peek(1).has_value() && peek(1).value() == '=') {
+                consume();
+                consume();
+                return Token{.type = TokenType::not_equals_condition};
+            }
+            return {};
         case '+':
             return consumeAndAdd(TokenType::plus);
         case '-':
